@@ -1,9 +1,13 @@
 ---
 layout: post
-title: You're up and running!
+title: Jekyll Now blog up and running!
+date: 2016-09-11
+tags: [PrototypePost1,Other]
 ---
 
-Next you can update your site name, avatar and other options using the _config.yml file in the root of your repository (shown below).
+Keeping this post so I can look up how it works.
+
+Site name, avatar and other options are in the _config.yml file in the root of your repository (shown below).
 
 ![_config.yml]({{ site.baseurl }}/images/config.png)
 
