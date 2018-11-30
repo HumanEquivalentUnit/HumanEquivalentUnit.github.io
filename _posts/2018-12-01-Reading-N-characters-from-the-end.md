@@ -14,6 +14,8 @@ They wanted to get the last 100 characters quickly.
 
 That's easy enough, I thought. (TL, DR. It wasn't).
 
+<!-- more -->
+
 ---
 
 #### You can use .Net to read the last 20 bytes from a file easy enough:
@@ -188,7 +190,7 @@ Now my understanding is more like this:
 |          |         |               | Unicode?     | Unicode?               |
 |          | "a"     | "aé"          | U+0103       | (Multiple CodePoints?) |
 |          | ASCII   | Unicode?      | UTF8         | (Choice of Encoding)   |
-| byte(s): | 97      | 97 233        | 196 131      | <Dragons here>         |
+| byte(s): | 97      | 97 233        | 196 131      | Dragons here           |
 
 
 But the summary is: there isn't any way to cut the last 20 characters from a file.
