@@ -190,7 +190,7 @@ Now my understanding is more like this:
 |          |         |               | Unicode?     | Unicode?               |
 |          | "a"     | "aé"          | U+0103       | (Multiple CodePoints?) |
 |          | ASCII   | Unicode?      | UTF8         | (Choice of Encoding)   |
-| byte(s): | 97      | 97 233        | 196 131      | Dragons here           |
+| byte(s): | 97      | 97 233        | 196 131      | ¿Dragons here🐉        |
 
 
 But the summary is: there isn't any way to cut the last 20 characters from a file.
@@ -209,8 +209,12 @@ And even if you read 2Gb of bytes from the beginning,
 it doesn't make sense to `.SubString()` it to take "some characters"
 out of the end. Because it might split in the middle of a multi-character-grapheme.
 
-Even though the preview of the book is quite readable, 
-I doubt I could make it through 800+ pages of this,
+Although for English speakers and most files, you can do it,
+and it works and it's fine and convenient. 
+You just can't do it properly quickly. Or at all.
+
+The preview of the book is quite readable, 
+(I doubt I could make it through 800+ pages though),
 but it probably contains many other reasons this can't work 100% correctly.
 
 Which means all the things from earlier programming lessons aren't quite right.
@@ -222,5 +226,4 @@ Which means all the things from earlier programming lessons aren't quite right.
 - reversing a string isn't easy and might be impossible
 - checking if a string is a palindrome..
 - oh heck, google "wrong facts programmers believe about Unicode" there's probably thousands of these things.
-
 
