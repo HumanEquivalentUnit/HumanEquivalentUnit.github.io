@@ -7,34 +7,31 @@ tags: [Programming-General,]
 
 Programmers argue about whether arrays start at 1 or 0. (Read more about which languages use which [here on WikiPedia](https://en.wikipedia.org/wiki/Comparison_of_programming_languages_(array)))
 
-I had the idea that this is not a fact about the array,
+I started this post thinking that it's not a fact about the array,
 but a matter of choice about how we discuss it and use it.
 Spiritual people say the world is not separated into many parts,
-but putting names on a bit of the world makes us see is as separate.
+but putting names on a bit of the world makes us see is as separate,
+and that is related.
 
-We see `A, B, C, D` and it "is" the same thing for all of us,
-there are four things and we can count them either `0, 1, 2, 3`
-or `1, 2, 3, 4`.
+We see the text `(A, B, C, D)` the same for all of us,
+there are four things and we can count them. 
 
-When we talk about the array "starting at 0" that's what we see,
-when we talk about `A` being "the 1st item" we see that instead.
-See it as a *choice*, and then ask "why not make two ways to access it?",
-a machine way and a human way:
+Both countings `(0, 1, 2, 3)` or `(1, 2, 3, 4)` can make sense,
+when we talk about the array "starting at 0" we see the first counting style,
+when we talk about `A` being "the 1st item" we see the second.
+
+See it as a *choice*, and then ask if we talk about two valid ways to access it,
+why not *make* two ways to access it?
+The language need not choose, programmers can choose:
 
     $array = @('A', 'B', 'C', 'D')
     $array.Item(0)            # -> 'A'
     $array.HumanItem(1)       # -> 'A'
 
-The language need not choose, programmers can choose.
-Then you can walk it either `0 to N-1` or `1 to N`.
+Then you can walk it with either sequence over the items: `0 to N-1` or `1 to N`.
 
-PowerShell arrays start from index 0, 
-but PowerShell array notation `0..4` makes five items `0, 1, 2, 3, 4`,
-which is one too many. The array offset choice and the sequence notation are not in harmony,
-so we often need to write the adjustment `0..(Length - 1)`.
-
-We can't change `..` very easily, but we can add a HumanItem() method to an array,
-and pretend it starts at 1:
+PowerShell arrays start at 0, but we can fix it, 
+add a HumanItem() method to an array, and pretend it starts at 1:
 
     PS C:\> $array = @('A', 'B', 'C', 'D')
     PS C:\> $array.Item(0)
@@ -62,11 +59,19 @@ Then write:
     C
     D
 
-You might guess what's coming - 
-[Prof. Dijkstra's essay](https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html) about sequences,
-where they start and end, and why it follows that starting at 0 makes sense.
+PowerShell arrays start from index 0,
+and it has an array notation `0..4` to make a sequence of numbers,
+but `0..N` to get all the items in an array actually makes five numbers: `0, 1, 2, 3, 4`,
+if you want to get everything in the array you need to write the adjustment `0..(Length - 1)`.
 
-And, he remarks:
+You might guess what's coming - 
+[Prof. Dijkstra's famous essay](https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html) about sequences,
+where they start and end.
+
+From that, Powershell is "doing it wrong".
+Arrays should start at 0 and sequences like `0..N` should generate `0, 1, 2 .. (N-1)`.
+
+But, I had forgotten this bit, he remarks:
 
 > _Remark_ The programming language Mesa, developed at Xerox PARC,
 > has special notations for intervals of integers in all four conventions.
@@ -80,24 +85,25 @@ And, he remarks:
 
 And that's from 1982.
 
-Seems like `.Item()` vs `.HumanItem()` is a bad idea. 
-Not a choice I want to make over and over, and prone to introducing mistakes.
+And instead of saying "it might be interesting to add two ways 
+to reference items in an array", I'm no longer going with that.
+Seems like `.Item()` vs `.HumanItem()` is a bad idea.
+Not a choice I want to make over and over,
+but worse - prone to introducing mistakes.
+
 (Thank goodness for iterators and `foreach ($x in $array) {}`
 which takes care of the most common "go through all the items" case).
 
-[Richard Feynman](https://www.youtube.com/watch?v=ga_7j72CVlc) was taught to separate
-things from how people talk about them, "names are not knowledge",
-but too much of that and you won't be able to communicate with people.
+---
 
-Which might be why "there are only two kinds of languages: the ones people complain about and the ones nobody uses" - Bjarne Stroustrup.
+On a related note, [Prof. Richard Feynman](https://www.youtube.com/watch?v=ga_7j72CVlc)
+was taught to separate things from how people talk about them,
+and in this video he tells a story about how "names are not knowledge",
+but he also warns that going to far down that line of thinking leaves
+you unable to communicate with people, because you don't know what anything is called.
 
-And why there are many LISP dialects and few Java dialects.
+Having two ways to index into an array would only make it harder to say which item was "number 1".
 
 Put up with someone else's way of seeing the world (along with everyone else),
 or make up your own (which nobody else uses).
-
-The common suggestion "if you don't like it, change it" rings false.
-If excluding someone from a group is rude, telling someone to exclude themselves also is.
-Being unable to change something hurts, but being able to change anything
-risks people isolating from each other, fragmentation, and loss of coherent direction.
 
