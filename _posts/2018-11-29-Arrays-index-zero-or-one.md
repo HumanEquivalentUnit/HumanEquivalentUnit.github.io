@@ -36,6 +36,9 @@ add a HumanItem() method to an array, and pretend it starts at 1:
     PS C:\> $array = @('A', 'B', 'C', 'D')
     PS C:\> $array.Item(0)
     A
+    
+    # Here I use a comma to send $array down the pipeline
+    # instead of unrolling it and sending the contents instead
     PS C:\> ,$array | Add-Member -Name HumanItem -MemberType ScriptMethod -Value {
     >> param([ValidateScript({$_ -gt 0})][int[]]$Index)
     >> foreach ($i in $index)
