@@ -30,7 +30,7 @@ Then you can walk it either `0 to N-1` or `1 to N`.
 
 PowerShell arrays start from index 0, 
 but PowerShell array notation `0..4` makes five items `0, 1, 2, 3, 4`,
-which is one two many. The array offset choice and the sequence notation are not in harmony,
+which is one too many. The array offset choice and the sequence notation are not in harmony,
 so we often need to write the adjustment `0..(Length - 1)`.
 
 We can't change `..` very easily, but we can add a HumanItem() method to an array,
@@ -62,7 +62,7 @@ Then write:
     C
     D
 
-You might guess know what's coming - 
+You might guess what's coming - 
 [Prof. Dijkstra's essay](https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html) about sequences,
 where they start and end, and why it follows that starting at 0 makes sense.
 
