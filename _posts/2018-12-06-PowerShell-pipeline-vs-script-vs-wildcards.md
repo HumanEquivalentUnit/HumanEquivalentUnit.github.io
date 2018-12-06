@@ -5,6 +5,8 @@ date: 2018-12-06
 tags: [PowerShell,pipeline]
 ---
 
+Some background and context for how [Joel's PowerShell issue 8407](https://github.com/PowerShell/PowerShell/pull/8407) was found and fixed.
+
 PowerShell lives in two worlds: scripts, and interactive shell. Scripts tend to look like other programming languages with loops and functions and error handling, they want to be clear and maintainable. 
 Shell commands look like other shells, with commands and parameters and pipelines, they want to be something you could reasonably type and compose together without too much "programming" overhead.
 PS has the idea of "elastic syntax", that one language can be written short-form or long-form, in a programming style or a shell style. (Downside: it has a *ton* of syntax).
