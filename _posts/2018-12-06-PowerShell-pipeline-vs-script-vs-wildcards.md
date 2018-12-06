@@ -68,7 +68,7 @@ and that cmdlet accepts wildcards to find the property:
 PS C:\> gci | foreach-object -membername len*
 ```
 
-Which is bizarre because the wildcard must to resolve to one single property or method name,
+Which is bizarre because the wildcard must resolve to one single property or method name,
 otherwise you get a screenful of this:
 
 ```
