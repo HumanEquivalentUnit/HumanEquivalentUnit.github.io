@@ -107,9 +107,9 @@ try three things in the time it would have taken you to try one.
 
 ----
 
-So explorating short commands and wildcards, 
+So exploring short commands and wildcards, 
 trying them and seeing where they are allowed, 
-is how I came to be up looing at `get-variable`,
+is how I came to be up looking at `get-variable`,
 which is the code/cmdlet version of just `$x`:
 
 ```
