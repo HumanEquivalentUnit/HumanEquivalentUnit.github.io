@@ -152,12 +152,12 @@ don't behave the same. `$x` lists the values of a container (e.g. an array) into
 Get-Variable outputs the array as a single whole item down the pipeline.
 
 I commented about this on the PowerShell Slack channel,
-and Joel ([Vexx32](https://github.com/vexx32) guessed immediately what is happening,
-jumped into the source code of the `Get-Variable` cmdlet and confirmed it.
+and Joel ([Vexx32](https://github.com/vexx32)) immediately guessed what's happening,
+jumped into the source code of the `Get-Variable` cmdlet, and confirmed it.
 There is a way for cmdlets to write their output to the pipeline,
 and they have a choice of whether to trigger enumeration/unrolling of the content or not.
 
-And because he's a good egg, he fixed it and submitted a 5-character fix to the PowerShell project, 
+And because he's a good egg, he fixed it and submitted a single-change fix to the PowerShell project, 
 in [issue 8407](https://github.com/PowerShell/PowerShell/pull/8407). This change:
 
 ```
