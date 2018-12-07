@@ -20,24 +20,28 @@ That's easy enough, I thought. (TL, DR. It wasn't).
 
 #### You can use .Net to read the last 20 bytes from a file easy enough:
 
-    $numBytes = 20
-    $file = Get-Item -Path .\bigfile.txt
+```powershell
+$numBytes = 20
+$file = Get-Item -Path .\bigfile.txt
 
-    # Open file as a stream, 
-    # and seek back from the end.
-    $stream = [System.IO.File]::OpenRead($file.FullName)
-    [void]$stream.Seek(-$numBytes, [System.IO.SeekOrigin]::End)
+# Open file as a stream, 
+# and seek back from the end.
+$stream = [System.IO.File]::OpenRead($file.FullName)
+[void]$stream.Seek(-$numBytes, [System.IO.SeekOrigin]::End)
 
-    # Read some bytes from it into a buffer,
-    # and decode them into text
-    $buffer = [byte[]]::new($numBytes)
-    [void]$stream.Read($buffer, 0, $numBytes)
-    $stream.Close()
-    
+# Read some bytes from it into a buffer,
+# and decode them into text
+$buffer = [byte[]]::new($numBytes)
+[void]$stream.Read($buffer, 0, $numBytes)
+$stream.Close()
+```
+
 *And* you can turn them into a string, easy enough:
 
-    [System.Text.Encoding]::ASCII.GetString($buffer)
-    
+```powershell
+[System.Text.Encoding]::ASCII.GetString($buffer)
+```    
+
 Which is alllmost fine. Oh btw, what's that over there...
 
 ---
@@ -119,17 +123,21 @@ then decoded back to text another way. Let's see a couple:
 
 Smartquotes like `“` run through UTF8 then back through UTF16-LE:
 
-    PS C:\> $bytes = [system.text.encoding]::UTF8.GetBytes('“')
+```powershell
+PS C:\> $bytes = [system.text.encoding]::UTF8.GetBytes('“')
     
-    PS C:\> [system.text.encoding]::Unicode.GetString($bytes)
-    胢�
+PS C:\> [system.text.encoding]::Unicode.GetString($bytes)
+胢�
+```
 
 Text through Unicode then back through UTF8:
 
-    PS C:\> $bytes = [system.text.encoding]::Unicode.GetBytes('test')
+```powershell
+PS C:\> $bytes = [system.text.encoding]::Unicode.GetBytes('test')
     
-    PS C:\> [system.text.encoding]::UTF8.GetString($bytes)
-    t e s t 
+PS C:\> [system.text.encoding]::UTF8.GetString($bytes)
+t e s t 
+```
 
 There's a few common versions of these, 
 and a few more when considering HTML like `£` showing up wrong, 
