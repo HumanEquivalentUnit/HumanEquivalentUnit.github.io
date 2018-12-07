@@ -24,43 +24,49 @@ See it as a *choice*, and then ask if we talk about two valid ways to access it,
 why not *make* two ways to access it?
 The language need not choose, programmers can choose:
 
-    $array = @('A', 'B', 'C', 'D')
-    $array.Item(0)            # -> 'A'
-    $array.HumanItem(1)       # -> 'A'
+```powershell
+$array = @('A', 'B', 'C', 'D')
+$array.Item(0)            # -> 'A'
+$array.HumanItem(1)       # -> 'A'
+```
 
 Then you can walk it with either sequence over the items: `0 to N-1` or `1 to N`.
 
 PowerShell arrays start at 0, but we can fix it, 
 add a HumanItem() method to an array, and pretend it starts at 1:
 
-    PS C:\> $array = @('A', 'B', 'C', 'D')
-    PS C:\> $array.Item(0)
-    A
-    
-    # Here I use a comma to send $array down the pipeline
-    # instead of unrolling it and sending the contents instead
-    PS C:\> ,$array | Add-Member -Name HumanItem -MemberType ScriptMethod -Value {
-    >> param([ValidateScript({$_ -gt 0})][int[]]$Index)
-    >> foreach ($i in $index)
-    >>     {
-    >>         $this[($i - 1)]
-    >>     }
-    >> }
-    PS C:\> $array.HumanItem(1)
-    A
+```powershell
+PS C:\> $array = @('A', 'B', 'C', 'D')
+PS C:\> $array.Item(0)
+A
+
+# Here I use a comma to send $array down the pipeline
+# instead of unrolling it and sending the contents instead
+PS C:\> ,$array | Add-Member -Name HumanItem -MemberType ScriptMethod -Value {
+>> param([ValidateScript({$_ -gt 0})][int[]]$Index)
+>> foreach ($i in $index)
+>>     {
+>>         $this[($i - 1)]
+>>     }
+>> }
+PS C:\> $array.HumanItem(1)
+A
+```
 
 Then write:
 
-    PS C:\> $array[0..($array.Length - 1)]
-    A
-    B
-    C
-    D
-    PS C:\> $array.HumanItem(1..$array.Length)
-    A
-    B
-    C
-    D
+```powershell
+PS C:\> $array[0..($array.Length - 1)]
+A
+B
+C
+D
+PS C:\> $array.HumanItem(1..$array.Length)
+A
+B
+C
+D
+```
 
 PowerShell arrays start from index 0,
 and it has an array notation `0..4` to make a sequence of numbers,
