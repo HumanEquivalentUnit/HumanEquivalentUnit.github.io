@@ -13,7 +13,7 @@ PS has the idea of "elastic syntax", that one language can be written short-form
 
 e.g. assigning a variable can be done by these:
 
-```
+```powershell
 PS C:\> $lines = get-content -Path 'words.txt'
 PS C:\> $lines = gc words.txt
 or
@@ -43,7 +43,7 @@ than having to stop and edit the front of the line to add `$tmp =`.
 Another common thing to decide mid-way through typing is that I need to extract some value,
 e.g. get the length of all files in a folder:
 
-```
+```powershell
 PS C:\> Get-ChildItem | where-object { $_.Length -gt 0 } | Select-Object -ExpandProperty Length
 PS C:\> gci -file | select -exp length
 PS C:\> (gci).length     # this one switches styles. But it doesn't work for .Length.
@@ -56,7 +56,7 @@ But then I learned about a way to use `ForEach-Object -MemberName Length` to loo
 And it quietly suppresses errors so referencing the length of a directory won't fill the screen with errors.
 And `foreach-object` has the default alias `%`, so it became a staple shell pattern for me, overnight:
 
-```
+```powershell
 PS C:\> gci -file | foreach-object -membername Length`
 PS C:\> gci |% length
 ```
@@ -64,14 +64,14 @@ PS C:\> gci |% length
 Here, `length` is an argument to foreach-object,
 and that cmdlet accepts wildcards to find the property:
 
-```
+```powershell
 PS C:\> gci | foreach-object -membername len*
 ```
 
 Which is bizarre because the wildcard must resolve to one single property or method name,
 otherwise you get a screenful of this:
 
-```
+```powershell
 PS C:\> gci | foreach -member l*
 % : Input name "l*" is ambiguous. It can be resolved to multiple matched members. Possible matches include: LinkType
 Length LastAccessTime LastAccessTimeUtc LastWriteTime LastWriteTimeUtc.
@@ -112,7 +112,7 @@ trying them and seeing where they are allowed,
 is how I came to be up looking at `get-variable`,
 which is the code/cmdlet version of just `$x`:
 
-```
+```powershell
 PS C:\> $x = 1
 PS C:\> $x
 1
@@ -124,7 +124,7 @@ I have little idea who uses this as the main approach to variables,
 but it also exists as the alias `gv` and it accepts wildcards for the name.
 Now:
 
-```
+```powershell
 PS C:\> $someVeryLongNameHere = 1,2,3,4,5
 PS C:\> $someVeryLongNameHere = 1,2,3,4,5
 1
@@ -160,7 +160,7 @@ and they have a choice of whether to trigger enumeration/unrolling of the conten
 And because he's a good egg, he fixed it and submitted a single-change fix to the PowerShell project, 
 in [issue 8407](https://github.com/PowerShell/PowerShell/pull/8407). This change:
 
-```
+```powershell
 -     WriteObject(matchingVariable.Value);
 +     WriteObject(matchingVariable.Value, enumerateCollection: true);
 ```
