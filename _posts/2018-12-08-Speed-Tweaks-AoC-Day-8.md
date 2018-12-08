@@ -11,7 +11,7 @@ and asks you to parse a tree out of it.
 and [my input data is here](https://github.com/HumanEquivalentUnit/AdventOfCode2018/blob/master/2018-12-08-data.txt);
 this blog post is about how I tweaked it from 1.1 seconds runtime to 0.205 seconds runtime.
 
-Click for a [1 min 40 second video of my undo/redo buffer from the start to the end of all of this](https://github.com/HumanEquivalentUnit/AdventOfCode2018/blob/master/2018-12-08-PowerShell-coding.mp4).
+Click for a [1 min 40 second video of my undo/redo buffer from the start to the end of all of this](https://streamable.com/8lnzs).
 
 <!--more-->
 
