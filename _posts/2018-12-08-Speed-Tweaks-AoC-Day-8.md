@@ -11,6 +11,8 @@ and asks you to parse a tree out of it.
 and [my input data is here](https://github.com/HumanEquivalentUnit/AdventOfCode2018/blob/master/2018-12-08-data.txt);
 this blog post is about how I tweaked it from 1.1 seconds runtime to 0.205 seconds runtime.
 
+Click for a [1 min 40 second video of my undo/redo buffer from the start to the end of all of this](https://github.com/HumanEquivalentUnit/AdventOfCode2018/blob/master/2018-12-08-PowerShell-coding.mp4).
+
 <!--more-->
 
 The testing code is `measure-command { .\code.ps1 | out-default }` and that shows both the code result, 
@@ -18,7 +20,7 @@ and the timing data. It's not very accurate - use System.Diagnostics.StopWatch f
 but run it two or three times after a change, and it's good enough to show gain or loss.
 
 At this point, I had written it with a stack, a `switch` and some lists and it was working,
-running both parts in ~1.1 seconds.
+running over an input of ~17,000 numbers, getting results for both puzzle parts in ~1.1 seconds.
 
 After spending a while tweaking, I got it down to ~205ms. 
 
@@ -27,7 +29,12 @@ and documented them below. This is a reverse log of trial-and-error 80% speedup.
 
 ----
 ### Next
-What drives the state machine? I had `strings` for states, like so:
+The core of my code was a while loop until the string ended, 
+and a `switch()` based state machine which was going to have states like "starting a new node",
+"starting a child node", "getting metadata", "updating the tree", "returning up a level".
+It ended up only needing "start of a node" and "end of a node".
+
+So what handles the states in the state machine? I had `strings` for states, like so:
 
 ```powershell
 $parserState = 'NewNode'
@@ -40,7 +47,9 @@ switch($parserState) {
 }
 ```
 
-and I thought `enums` might do a number comparison and be much faster than a string comparison:
+and I thought that string comparisons might have to be done from start to end,
+and PS does them case insensitively so there might be a lot of work happening behind the scenes.
+`enums` have integer values, and a number comparison might be much faster than a string comparison:
 
 ```powershell
 enum state {
@@ -58,13 +67,15 @@ switch($parserState) {
 }
 ```
 
-Result: much worse! Much much worse.
-Removing the strings and enums, and going to integers with simple `$stateNEWNODE = 0` 
-for states was significantly faster, ~100ms, I think.
+Result: worse! much worse.
+Removing the strings and enums, and going to integers with my own code,
+using a simple `$stateNEWNODE = 0; $stateMETADATACLEANUP = 1` 
+for states was significantly faster than strings or enums, ~100-200ms, I think.
 
 ----
 ### Next
-When parsing a new node, make a hashtable and setup lists to hold the childNodes and MetaData values:
+When parsing a new node I make a hashtable for it, 
+with lists to hold the childNodes and MetaData values:
 
 ```powershell
                @{ 
@@ -84,26 +95,29 @@ I wanted to make that conditional, to save the cost of initialization, so I trie
 
 Result: SCREEN FULL OF EXCEPTIONS
 
-Scratching my head long time, tried several variations, until I realised the `if` was enumerating
-the values from the empty list, and assigning `$null`. I would have to `,` in front of it to get the 
-list back:
+Scratching my head long time, tried several variations, 
+until I realised the `if` was enumerating the values from the empty list,
+and assigning `$null`. I would have to use the trick of putting `,` 
+in front of it to make a 1-item-array wrapper so the unrolling works on that and leaves the list alone:
 
 ```powershell
             $childNodeList      = if ($numChildNodes      -gt 0) { ,[List[psobject]]::new() } else { $null }
             $metaDataList       = if ($numMetaDataEntries -gt 0) { ,[List[psobject]]::new() } else { $null }
 ```
 
-Result: no benefit, maybe even slower, and ugly code. Reverted.
+Result: no benefit, maybe slower, and ugly code. Not sure if memory use improved, but code change reverted.
 
 ----
 ### Next
-In part 2 adding up the metadata values:
+In part 2 adding up the metadata values (sum a collection of ints):
 
 ```powershell
                 $currentNode.value = ($currentNode.metaData | measure-object -Sum).Sum
 ```
 
-Tried to cut out the pipeline and cmdlet invocation with this fast loop:
+I wanted to avoid the pipeline setup cost, 
+and cmdlet name resolution and initialization costs,
+with this fast loop:
 
 ```powershell
                 $localSum = 0; foreach ($m in $currentNode.metaData) { $localSum += $m }
@@ -111,10 +125,13 @@ Tried to cut out the pipeline and cmdlet invocation with this fast loop:
 ```
 
 Result: bigger speedup than I expected, worth doing even though the code looks uglier.
+Could certainly be spread onto more lines, 
+but makes me wish for Python's `sum(Iterable)` construct.
 
 ----
 ### Next
-The state machine was "state 0, new node is starting" and "state 1, node ending". Code like:
+The state machine was down to two states: "state 0, new node is starting"
+and "state 1, node ending". Code like this:
 
 ```powershell
             $parserState = $stateMETADATACLEANUP
@@ -142,7 +159,8 @@ The state machine was "state 0, new node is starting" and "state 1, node ending"
 
 This use of if/else tests every time through the loop was bothering me. 
 Eventually I realised that they're not really states, 
-they're counters for how many child-nodes still need parsing below here.
+they're counters for how many child-nodes still need parsing below,
+before we can get to this level's metadata. All that became this:
 
 ```powershell
             $parserState = $nodeSkeleton.numChildNodes
@@ -152,9 +170,9 @@ they're counters for how many child-nodes still need parsing below here.
             $parserState = $parent.childNodes.Count - $parent.numChildNodes
  ```
 
-Now it falls to "state 0" when there are no childnodes or none remaining, 
-and "state N" (switch 'default') when there are some. 
-I might have swapped the switch statement order around as well.
+Now it falls to "state 0" when there are no childnodes at all, or no more remaining, 
+and "state N" (switch 'default') when there are some new nodes to start.
+(I think I swapped the switch blocks around as well at this point).
 
 Result: pleasingly less code, some speed improvement, quite small, not really worth doing.
 
@@ -181,18 +199,19 @@ the loop can go, and be replaced with a multi-index lookup and direct array assi
             $i += $currentNode.numMetadataEntries
 ```
 
-and lower down / earlier on at the node initialization, 
+and lower down in the code / earlier on in the exeuction when setting up a new node, 
 `metaData = [List[psobject]]::new()` can become `metaData = $null` saving setup time and memory.
-Result: pleasingly large gain, can't remember how much, but in the ~30ms region.
+Result: pleasingly large gain, can't remember how much, but ~30ms region ish.
 
 ----
 ### Next
-Realised I was calculating the `$localSum` twice. Once from Part 1 of the puzzle, and again for part 2.
+Realised I was calculating the `$localSum` sum-of-metadata-for-a-node twice. Once from Part 1 of the puzzle, again for part 2.
 Removed that duplicate work. It helped a little.
 
 ----
 ### Next
-In part 2 of the puzzle, there is a lookup into the childNodes 1-indexed offsetd, and a sum of their values.
+In part 2 of the puzzle, there is a lookup into the childNodes 1-indexed,
+and a sum of those values.
 
 Earlier it had been a loop with a check:
 
@@ -205,8 +224,8 @@ Earlier it had been a loop with a check:
                     }
 ```
 
-and I had removed the `if` because PS will handle reading from an array where nothing is there,
-and casting $nulls to int 0. At this point it was already a fast `foreach(){}` loop like so:
+and I had removed the `if` because PS will handle reading outside the bounds of an array,
+and casts $nulls to int 0. At this point it was already a fast `foreach(){}` loop like so:
 
 ```
                 foreach ($m in $currentNode.metaData)
@@ -216,8 +235,8 @@ and casting $nulls to int 0. At this point it was already a fast `foreach(){}` l
                 }
 ```
 
-And made no check for whether the childNode even exists, or the value exists, PS will cast those to $null/0 implicitly.
-[It occurs to me now, that implicit casting is a bit slow, it might be faster if I hadn't done this, and used if/else].
+(It occurs to me now, that implicit casting is a bit slow, 
+it might be faster if I hadn't done this, and used if/else).
 
 But I hoped to use a multi-lookup with `childNodes[$currentNode.metaData]` instead of a loop in my code,
 make the PS Engine loop in faster C# code behind the scenes. To get around the need to `$m-1` every time,
@@ -267,11 +286,17 @@ Result: from memory, mild improvement.
 ----
 ### Next
 
-Starting with `using system.collections.generic` and then writing `[list[psobject]]`,
-I tried changing to `[system.collections.generic.list[psobject]]`.
+When I started I had `[system.collections.generic.List[psobject]]` all over the place, 
+and was annoyed with typing it. [Joel Bennet / Jaykul](https://twitter.com/Jaykul) in the PowerShell Slack chatroom
+reminded me that `using system.collections.generic` can go at the top,
+and then each one can be shortened to `[list[psobject]]`.
+At this point in my code I had cut down the use of it quite a bit, 
+and wondered if this namespace lookup shortname-to-fullname might cause a measurable delay.
+It does in a lot of PowerShell, resolving `where` to `where-object` takes time, for example.
 
-Wasn't expecting much and no performance change that I could tell, but by this stage I was only using it twice,
-so I left it in.
+I tried changing them to `[system.collections.generic.list[psobject]]`.
+
+No performance change that I could tell, but I left it in.
 
 ----
 ### Next
@@ -290,14 +315,17 @@ Changed to a long and ugly line such as
 ```powershell
 $inputNums = [int[]][System.IO.File]::ReadAllText((Get-Location).Path + '\data.txt')).Split(" `r`n")
 ```
-But it was no faster. Just now, I've thought of `$pwd.Path` to avoid that cmdlet call,
-but I can't tell any change one way or the other. Change reverted.
+But it was no faster. Not much surprise as I left another cmdlet call in there.
+While writing this, I've found `$pwd.Path` to get the PS path and avoid that cmdlet,
+but I can't tell if it makes any change one way or the other.
+Change reverted because it's too ugly this way.
 
 ----
 ### Next
 
-The "state machine" had boiled down to two states, 
-and I swapped this `switch` pattern:
+Here's when I realised the "state machine" had boiled down to two states, 
+which could be simplified to an `if/else`.
+I swapped this `switch` pattern:
 
 ```powershell
 switch ($numRemainingChildNodes)
@@ -310,7 +338,7 @@ switch ($numRemainingChildNodes)
 }
 ```
 
-for this simpler one:
+for this:
 
 ```powershell
 if ($numRemainingChildNodes -gt 0)
@@ -319,13 +347,13 @@ else
 {}
 ```
 
-I wasn't really expecting a change, because switch is a builtin, but it helped ~10ms.
+I wasn't really expecting a performance change because switch is a builtin keyword, 
+just wanted it shorter and cleaner. Surprisingly, it did help ~10-15ms.
 
 ----
 ### Next
 Once the stack is empty and we're nearing the end,
-I need to avoid calling `.Peek()` on it, that's an exception.
-
+I need to avoid calling `.Peek()` on it, because that throws an exception.
 Code started as:
 
 ```powershell
@@ -339,13 +367,20 @@ Code started as:
         }
 ```
 
+But this means doing the `if` test for every node end, 
+when there's only the root node which will empty the stack.
+How wasteful.
 First try was just to comment out the `if () {}` block and let it throw an exception,
-and deal with seeing the error message. That's worse, generating an exception is ~25ms slower.
+and deal with seeing the error message.
+Would saving the test cost many times win over the large cost of raising and propagating an exception?
+No it wouldn't, letting it throw an exception makes it ~20-35ms slower.
 
-I looked around for any other method than reading and comparing the count, 
-hoping to find `$stack.Empty` but it doesn't exist. 
-Second try was to add a fake-node to the stack when initializing it.
-This helped by ~5ms.
+I looked around for another way to do the test than reading and comparing the count, 
+hoping to find `$stack.IsEmpty` but nothing looked good.
+
+Second try was to add a fake-node to the stack when initializing it,
+now I can .peek() the stack and it will never be empty.
+Avoids the test on every node and the exception.
 
 ```powershell
 # at the very top, push a buffer node onto the stack.
@@ -355,6 +390,21 @@ $stack.Push(@{childNodes=[System.Collections.Generic.List[psobject]]::new()})
         $parent = $stack.Peek()
         $parent.childNodes.Add($currentNode)
 ```
+This helped by ~5ms.
+
+----
+### Next
+
+Somewhere in here I learned that implicit casting is slower.
+For a long time I have advocated `if ($x.Thing -eq $true)` -> `if ($x.Thing)`
+and in a similar way `if ($x.Count -gt 0)` -> `if ($x.Count)`.
+PS can and will do the implicit conversion to `[bool]` so let's use it.
+
+But the operator `-gt 0` seems to be faster than `[bool]$x.Count`.
+There are reasonably complex rules for what PS objects are truthy vs. falsey,
+so perhaps there is overhead in going through those states, 
+and "number -gt 0" can ultimately boil down to a single CPU instruction.
+(Not sure if it actually does, but it could).
 
 ----
 ### End
