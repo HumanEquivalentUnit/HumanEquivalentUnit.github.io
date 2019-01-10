@@ -1,0 +1,43 @@
+---
+layout: post
+title: Using rancid-apc (apcrancid) module in RANCID 3.8
+date: 2019-01-10
+tags: [networking,Other]
+---
+
+The tool [RANCID from Shrubbery Networks, inc.](http://www.shrubbery.net/rancid/) 
+will login to network switches and get their current configuration,
+'diff' it against previous configuration, email you with any changes,
+and save the configuration to a version control system (cvs, svn or git).
+
+Modules can add support for different manufacturers,
+HP, Arista, Juniper, and many kinds of devices - 
+if it has an SSH, telnet, or ftp interface and can list its configuration to text,
+it's probably workable.
+
+APC UPS management cards have network interfaces for monitoring, 
+and APC environment monitoring units have as well,
+and there is a third party module [rancid-apc.tar.gz](ftp://ftp.shrubbery.net/pub/rancid/contrib/)
+in their unsupported contrib folder.
+
+It was built for RANCID v 2.x and the newer RANCID 3.x range works differently.
+
+To get it working, I:
+
+ - extracted the .tgz
+ - edited the `apcrancid` file and changed `#! /usr/bin/perl5` to `#! /usr/bin/perl` 
+ (find out where perl is with `which perl` or `locate perl`)
+ - edited the `apclogin` file and changed `#! /usr/local/bin/expect --` to `#! /usr/bin/expect --`
+ - copied both `apclogin` and `apcrancid` to `/usr/local/rancid/bin/` and make sure they are `chmod +x`
+ - the `rancid.fe` file has totally changed in v3.x, so don't copy it over or try to apply the patch.
+ 
+ Instead edit `/usr/local/rancid/etc/rancid.types.conf` wherever you installed it, and add:
+ 
+ ```
+apc;script;apcrancid
+apc;login;apclogin
+```
+
+Then add these devices like any other to your `routers.db` file, with the type `apc`. 
+
+That seems to be enough for this to work with 3.8.
