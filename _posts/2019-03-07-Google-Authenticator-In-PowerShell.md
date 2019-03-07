@@ -98,7 +98,14 @@ and get the `otpauth://` text out of it, and pic the secret code out of that,
 then generate a new QR code for it with your custom username and company name to show up in the app:
 
 ```powershell
-PS C:\> New-GoogleAuthenticatorSecret -UseThisSecretCode HP44SIFI2GFDZHT6 -Name "me@example.com" -Issuer "My bank 💎" -Online | fl *
+PS C:\> $authParams = @{
+  UseThisSecretCode = 'HP44SIFI2GFDZHT6' 
+  Issuer = "My bank 💎"
+  Name   = "me@example.com"
+  Online = $true
+}
+
+PS C:\> New-GoogleAuthenticatorSecret @authParams | fl *
 
 Secret    : HP44SIFI2GFDZHT6
 KeyUri    : otpauth://totp/me%40example.com?secret=HP44SIFI2GFDZHT6&issuer=My%20bank%20%F0%9F%92%8E
