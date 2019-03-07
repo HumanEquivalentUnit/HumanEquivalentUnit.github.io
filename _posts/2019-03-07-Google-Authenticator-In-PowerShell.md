@@ -93,17 +93,19 @@ and should be treated as carefully - store it somewhere safe, preferably an encr
 
 Playing with this code / the QrCodeUri and Google Charts would also let you
 add your serious website secret to the app, but with a more amusing name.
-Re-do your 2FA to get a new QR code, and get the `otpauth://` text out of it, and get the secret code.
-
-Generate a new code with your custom username and company name to show up in the app:
+Re-do your 2FA on an account to get a new QR code,
+and get the `otpauth://` text out of it, and pic the secret code out of that, 
+then generate a new QR code for it with your custom username and company name to show up in the app:
 
 ```powershell
-PS C:\> New-GoogleAuthenticatorSecret -Name 'My Login!' -Issuer 'Some Company' | % QrCodeUri
-https://chart.apis.google.com/chart?cht=qr&chs=200x200&chl=otpauth%3A%2F%2Ftotp%2FMy%2520Login%2521%3Fsecret%3D6HHNKDJM5RWHBHJY%26issuer%3DSome%2520Company
+PS C:\> New-GoogleAuthenticatorSecret -UseThisSecretCode HP44SIFI2GFDZHT6 -Name "me@example.com" -Issuer "My bank 💎" -Online | fl *
+
+Secret    : HP44SIFI2GFDZHT6
+KeyUri    : otpauth://totp/me%40example.com?secret=HP44SIFI2GFDZHT6&issuer=My%20bank%20%F0%9F%92%8E
+QrCodeUri : https://chart.apis.google.com/chart?cht=qr&chs=200x200&chl=otpauth%3A%2F%2Ftotp%2Fme%25[..]
 ```
 
-Then swap the secret part after `secret%3D` with your real code (%3D is = so leave that in),
-visit that in a browser, scan into the app - a working login, with custom text.
+web browser opens, and you can scan your bank code into the app, with new text around it.
 
 ----
 
