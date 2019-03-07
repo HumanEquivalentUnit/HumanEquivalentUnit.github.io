@@ -5,6 +5,16 @@ date: 2019-03-07
 tags: [PowerShell]
 ---
 
+```powershell
+PS C:\> Import-Module c:\downloads\GoogleAuthenticator.psm1
+PS C:\> Get-GoogleAuthenticatorPin -Secret XSFOC6D37UW6JOJ5 | Format-List
+
+PIN Code          : 030 191
+Seconds Remaining : 27
+```
+
+But where do you get that secret code?
+
 Relevant links:
  - [This blog post's PowerShell code - GoogleAuthenticator.psm1](https://github.com/HumanEquivalentUnit/PowerShell-Misc/blob/master/GoogleAuthenticator.psm1)
  - [An online QR code reader](https://webqr.com/) - click the 'still camera' icon on the top right, then you can drag QR codes to it.
@@ -35,10 +45,15 @@ If you have a signup for one of these Google 2FA sites,
 visit the online QR code reader linked above
 and see that the QR code contains [text in the Key Uri format](https://github.com/google/google-authenticator/wiki/Key-Uri-Format) like this:
 
-    otpauth://totp/{accountName}?secret={code}&issuer={companyName}
+```
+otpauth://totp/{accountName}?secret={code}&issuer={companyName}
+                                     ^
+                                      this is the secret
+``` 
     
 The first thing this PowerShell module can do is generate one of these random secrets,
-in this form, with a link to Google Chart API to show it as a QR code.
+wrap it in this `otpauth://` style link,
+then embed that in a link to Google Charts to show the whole thing as a QR code.
 
 ```powershell
 PS C:\> Import-Module c:\temp\GoogleAuthenticator.psm1
@@ -52,8 +67,9 @@ QrCodeUri : http://chart.apis.google.com/chart?cht=qr&chs=200x200&chl=otpauth%3A
 
 You can scan the QR code in the app to add your new token.
 
-
-Once you have the secret, you can generate the current PIN code for it:
+Once you have the secret code, 
+either generating your own (for fun) or taken from a real website's QR code for your account,
+you can generate the current PIN code for it:
 
 ```powershell
 PS C:\> $Secret | Get-GoogleAuthenticatorPin | Format-List
@@ -76,6 +92,17 @@ and should be treated as carefully - store it somewhere safe, preferably an encr
 
 Playing with this code / the QrCodeUri and Google Charts would also let you
 add your serious website secret to the app, but with a more amusing name.
+Re-do your 2FA to get a new QR code, and get the `otpauth://` text out of it, and get the secret code.
+
+Generate a new code with your custom username and company name to show up in the app:
+
+```powershell
+PS C:\> New-GoogleAuthenticatorSecret -Name 'My Login!' -Issuer 'Some Company' | % QrCodeUri
+https://chart.apis.google.com/chart?cht=qr&chs=200x200&chl=otpauth%3A%2F%2Ftotp%2FMy%2520Login%2521%3Fsecret%3D6HHNKDJM5RWHBHJY%26issuer%3DSome%2520Company
+```
+
+Then swap the secret part after `secret%3D` with your real code (%3D is = so leave that in),
+visit that in a browser, scan into the app - a working login, with custom text.
 
 ----
 
@@ -84,16 +111,16 @@ and trying to port [this GoLang code](https://github.com/robbiev/two-factor-auth
 and after getting code which looked OK but generated the wrong output,
 I worked from [this C# code](https://stackoverflow.com/questions/6421950/is-there-a-tutorial-on-how-to-implement-google-authenticator-in-net-apps)
 
-The algorithm itself is not enormously complex, but I did trip over a lot of minor problems:
+The algorithm itself is not very complex, but I did trip over a lot of minor problems:
 
  - Intel CPUs / dotnet on Windows is little-endian byte order, the algorithm needs big-endian byte order
  - Base32 encoding is involved and that means turning 8-bit-bytes into 5-bit-chunks, and I didn't want to write a whole lot of bit manipulation.
   - BigInteger class helped, but it stores bytes little-endian inside and has occasional padding for handling two's complement negative numbers.
   - After trying some combinations of BitConverter, and starting to port a page of C# code just for byte work, I switched to use regex and "binary" strings instead.
  - `[BitConverter]::GetBytes($time)` was trying to hit the overload for `[char]` until I added a `[int64]` type, and it was sometimes working.
- - I can't type the alphabet correctly and put "VXWYZ", so some codes would sometimes cause the wrong output.
+ - I can't type the alphabet correctly and put "VXWYZ", so some codes which included X or W would cause the wrong output.
  - dotNet has a mess of methods for URI Encoding, [8 different ones](https://stackoverflow.com/a/21771206) for different framework versions, which are variously broken, incompatible with RFCs, or non-standard.
   - (I'm not sure I picked a good one)
 
-NB. Google Authenticator app, and the TOTP protocol support more than I have coded - other window sizes, other hash algorithms.
+NB. Google Authenticator app, and the TOTP protocol support more features than I have coded - other window sizes, other hash algorithms.
 
