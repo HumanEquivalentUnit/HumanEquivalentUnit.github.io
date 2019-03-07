@@ -61,6 +61,7 @@ PS C:\> $Secret = New-GoogleAuthenticatorSecret -Online    # online will open a 
 PS C:\> $Secret | Format-List
 
 Secret    : XSFOC6D37UW6JOJ5
+KeyUri    : otpauth://totp/Example%20Website%3Aalice%40example.com?secret=XSFOC6D37UW6JOJ5&issuer=Example%20Corp%20%F0%9F%98%83
 QrCodeUri : http://chart.apis.google.com/chart?cht=qr&chs=200x200&chl=otpauth%3A%2F%2Ftotp%2FExample%2520Website%253Aal
             ice%2540example.com%3Fsecret%3DXSFOC6D37UW6JOJ5%26issuer%3DExample%2520Corp
 ```
