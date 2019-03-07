@@ -14,7 +14,7 @@ Relevant links:
 Google Authenticator is a 2-Factor Authentication (2FA) system, 
 with an app that generates codes like this:
 
-![Google Authenticator iPhone App Screenshot](images/2019-03-07-GoogleAuthenticatorApp.png)
+![Google Authenticator iPhone App Screenshot](/images/2019-03-07-GoogleAuthenticatorApp.png)
 
 I wanted to generate that PIN code in PowerShell.
 
@@ -29,7 +29,7 @@ and now anyone logging in needs to know your password *and* have your smartphone
 Behind the scenes, there is another secret stored against your user account and shared between the server and your smartphone.
 It gets there through a QR code, here's an example of a basic logon and enabling 2FA:
 
-![Example of basic website logon form vs combined 2FA signup and logon form](images/2019-03-07-GoogleAuthenticatorLoginExample.png)
+![Example of basic website logon form vs combined 2FA signup and logon form](/images/2019-03-07-GoogleAuthenticatorLoginExample.png)
 
 If you have a signup for one of these Google 2FA sites, 
 visit the online QR code reader linked above
