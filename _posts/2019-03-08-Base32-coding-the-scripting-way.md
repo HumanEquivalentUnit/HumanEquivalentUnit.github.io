@@ -10,7 +10,7 @@ the secret codes involved (e.g. `5WYYADYB5DK2BIOV`) are BASE32 encoded data.
 I want to write about how I did that in Powershell,
 but you might need to know what an encoding is first.
 
-If you know about encodings, [skip over this next part](#skipped-encoding).
+If you know about encodings, [skip over this next part](#skipped-encoding-intro).
 
 #### How do you pass a blob of data through the internet?
 
