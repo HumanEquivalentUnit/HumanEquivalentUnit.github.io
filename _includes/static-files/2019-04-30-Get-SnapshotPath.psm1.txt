@@ -1,4 +1,4 @@
-# Cloned from https://gist.github.com/jborean93/f60da33b08f8e1d5e0ef545b0a4698a0
+# Copied from https://gist.github.com/jborean93/f60da33b08f8e1d5e0ef545b0a4698a0
 
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
