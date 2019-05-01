@@ -32,5 +32,5 @@ That's why it's cool!
 You can then use the `\\SERVER\SHARE\@GMT-XXXX.XX.XX-XX.XX.XX` format of VSS file paths,
 and use `Copy-Item` to recover files, etc.
 
-[Link to copy of source, in case github Gist is removed](static-files/2019-04-30-Get-SnapshotPath.psm1.txt)
+[Link to copy of source, in case github Gist is removed](/static-files/2019-04-30-Get-SnapshotPath.psm1.txt)
 
